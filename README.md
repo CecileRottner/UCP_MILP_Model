@@ -1,4 +1,4 @@
-# Model
+# Unit Commitment Model
 
 The MILP model implemented corresponds to a min-up/min-down Unit Commitment Problem with or without ramp constraints :
 
@@ -19,5 +19,10 @@ Instance format is the one from : https://github.com/CecileRottner/UCPInstanceGe
 
 * Compile : ```make```
 
-* Execute: ```./mf```
+* Execute with example parameters from main.cc
 
+  ```./mf``` 
+
+* Execute with argument parameters:
+
+  ```./mf $ramp $data_folder $n $T 1 3 $sym 0 0 $id``` 

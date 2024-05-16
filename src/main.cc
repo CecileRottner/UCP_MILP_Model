@@ -45,7 +45,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     cplex.setParam(IloCplex::Param::ClockType, 1); //1 : CPU TIME
     cplex.setParam(IloCplex::Param::Threads, 1);
     cplex.setParam(IloCplex::EpGap, 0.0000001) ;
-    cplex.setParam(IloCplex::Param::TimeLimit, 20) ;
+    cplex.setParam(IloCplex::Param::TimeLimit, 10) ;
     //cplex.setParam(IloCplex::LongParam::NodeLim, 1) ;
 
 
@@ -163,23 +163,22 @@ main(int argc,char**argv)
     if (argc==1) {
         ofstream fichier("result.txt");
 
-        //fichier << "Instance & n & T & Sym & nG & max & mean & OptVal & RootRelax & ApproxGap &  USCuts & IUSCuts & SepTime & Prof & Nodes & CplexCuts & CPU \\\\ " << endl;
-        fichier << "Methode & n & T & OptVal & Nodes & NbFixs & TimeFix & CPU \\\\ " << endl;
+        fichier << "Methode ; n ; T ; id ; BestVal ; LowerBound ; Nodes ; NbFixs ; TimeFix ; CPU \\\\ " << endl;
 
-        double time = 0 ;
+        double time = 0 ; // total computational time (incremented by )
 
-        //Paramètres de l'instance
+        //Instance parameters
 
         int T = 24;
         int n = 20 ;
         int sym = 3 ;
         int demande = 3;
         int cat01 = 0;
-        int bloc = 1;
+        int bloc = 1; // parameter always to 1 in this setting
 
         int intra =0 ;
 
-        string localisation = "data/smaller/" ;
+        string localisation = "data/smaller/" ; // folder containing data sets
         InstanceProcessed Instance = InstanceProcessed(n, T, bloc, demande, sym, cat01, intra, 0, localisation) ;
 
         fichier << localisation << endl ;
@@ -191,47 +190,15 @@ main(int argc,char**argv)
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 3; sym >=3 ; sym--) {
-            Instance.symetrie = sym ;
+        Instance.symetrie = 3 ;
+        Instance.T=T ;
+        Instance.id = 1 ;
 
-            for (T=48 ; T <=48; T*=2) {
-
-                Instance.T=T ;
-
-
-                for (int id=1; id <=1; id++) {
-                    Instance.id = id ;
-
-
-                    env=IloEnv() ;
-                    process(Instance, fichier, time,RampDefaultCplex, env) ;
-                    env.end() ;
-//                    env=IloEnv() ;
-//                    process(Instance, fichier, time, AggregModel, env) ;
-//                    env.end() ;
-
-//                    env=IloEnv() ;
-//                    process(Instance, fichier, time, RampIneqRSU_RSDRamps, env) ;
-//                    env.end() ;
-
-//                    env=IloEnv() ;
-//                    process(Instance, fichier, time, ModeleIntervalle, env) ;
-//                    env.end() ;
-
-                    fichier << endl ;
-                }
-
-                fichier << endl ;
-                fichier << endl ;
-            }
-        }
+        //PROCESS INSTANCE: write model and solve with Cplex
+        env=IloEnv() ;
+        process(Instance, fichier, time,RampDefaultCplex, env) ;
+        env.end() ;
+        fichier << endl ;
     }
-
-
-
-
-
-
-
     return 0 ;
 }

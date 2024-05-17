@@ -3,19 +3,16 @@ rm result.txt
 
 intra=0
 
-for y in 1 ; do
-
-dossier=data/Litt_Real/
-
-
+dossier=data/GenData/
 
 T=48
 n=60
 
-for T in 96 ; do
-  for sym in 4 ; do
+for n in 60 ; do
+for T in 48 ; do
+  for sym in 3 ; do
     for id in {1..20}; do
-      for met in $(( -4 * $y )) $(( -5 * $y )) ; do	
+      for met in 0 1 ; do	
         ./mf $met $dossier $n $T 1 3 $sym 0 $intra $id
       done
       printf "\n" >> result.txt
@@ -23,10 +20,8 @@ for T in 96 ; do
     printf "\n" >> result.txt    
   done
 done
-
-
-printf "\n" >> result.txt
-printf "\n" >> result.txt
-
 done
+
+printf "\n" >> result.txt
+printf "\n" >> result.txt
 

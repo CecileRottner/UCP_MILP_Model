@@ -1,2 +1,2 @@
-CPLEXDIR      := /home/A79375/Cplex/CPLEX_Studio201/cplex
-CONCERTDIR    := /home/A79375/Cplex/CPLEX_Studio201/concert
+CPLEXDIR      := /home/cecile/cplex-12.9/cplex
+CONCERTDIR    := /home/cecile/cplex-12.9/concert

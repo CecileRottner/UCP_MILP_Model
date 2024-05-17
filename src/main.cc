@@ -16,7 +16,10 @@ using namespace std ;
 
 ILOSTLBEGIN
 
-
+// Process instance I and write results in "fichier"
+// time is a CPU counter
+// Methode indicates how to solve the instance and with which constraints
+// env is the Cplex environment
 int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met, IloEnv env) {
 
     string nom = I.fileName() ;
@@ -41,69 +44,47 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     IloCplex cplex(model) ;
 
 
-    //Paramètres
+    //Parameters
     cplex.setParam(IloCplex::Param::ClockType, 1); //1 : CPU TIME
     cplex.setParam(IloCplex::Param::Threads, 1);
     cplex.setParam(IloCplex::EpGap, 0.0000001) ;
     cplex.setParam(IloCplex::Param::TimeLimit, 10) ;
     //cplex.setParam(IloCplex::LongParam::NodeLim, 1) ;
 
-
-    //Résolution et affichage de la solution
+    //Solve and print solution (optional)
 
     cplex.solve();
 
     double t = cplex.getCplexTime();
     if (cplex.isPrimalFeasible()) {
        
-
         ///Affichage solution optimale
 
+        bool print_optimal_solution=false;
 
-        //    IloNumArray x_frac(env,0);
-        //    cplex.getValues(x_frac, x) ;
-        //    for (int i=0; i<n; i++) {
-        //        cout << "unité " << i << " : " ;
-        //        for (int t=0 ; t < T ; t++) {
-        //            cout << x_frac[i*T +t] << " " ;
-        //        }
-        //        cout << endl ;
-        //    }
-        //    cout << endl ;
+        if (print_optimal_solution)  {
+           IloNumArray x_frac(env,0);
+           cplex.getValues(x_frac, x) ;
+           for (int i=0; i<n; i++) {
+               cout << "unit " << i << " : " ;
+               for (int t=0 ; t < T ; t++) {
+                   cout << x_frac[i*T +t] << " " ;
+               }
+               cout << endl ;
+           }
+           cout << endl ;
 
-        //    IloNumArray u_frac(env,0);
-        //    cplex.getValues(u_frac, u) ;
-        //    for (int i=0; i<n; i++) {
-        //        cout << "start up unité " << i << " : " ;
-        //        for (int t=0 ; t < T ; t++) {
-        //            cout << u_frac[i*T +t] << " " ;
-        //        }
-        //        cout << endl ;
-        //    }
-        //    cout << endl ;
-
-        
-
-
-        double opt = cplex.getObjValue() ;
+        }
 
         fichier << met.getNum() <<  " ; " << n << " ; " << T  << " ; " << id ;
-        fichier <<  " ; " << cplex.getObjValue()  ; //Optimal value
-        fichier <<  " ; " << cplex.getBestObjValue()  ; 
+        fichier <<  " ; " << cplex.getObjValue()  ; //Best solution found
+        fichier <<  " ; " << cplex.getBestObjValue()  ; //Lower bound
         fichier <<  " ; "       << cplex.getMIPRelativeGap() << " \\% " ; //approx gap
         fichier <<  " ; " << cplex.getNnodes() ;
         fichier <<  " ; " << t - time ;
         fichier <<" \\\\ " << endl ;
-
-
     }
-
     time = t ;
-    //Destructeurs
-    // delete inst ;
-    // delete dataNode ;
-    // env.end() ;
-
     return 1;
 }
 
@@ -145,13 +126,13 @@ main(int argc,char**argv)
         double time = 0 ;
         IloEnv env ;
 
-        if (met==1) {
+        if (met==0) { // without ramp constraints
             env=IloEnv() ;
             process(Instance, fichier, time, DefaultCplex , env) ;
             env.end() ;
         }
 
-        if (met==2) {
+        if (met==1) { // with ramp constraints
             env=IloEnv() ;
             process(Instance, fichier, time, RampDefaultCplex , env) ;
             env.end() ;
@@ -163,12 +144,11 @@ main(int argc,char**argv)
     if (argc==1) {
         ofstream fichier("result.txt");
 
-        fichier << "Methode ; n ; T ; id ; BestVal ; LowerBound ; Nodes ; NbFixs ; TimeFix ; CPU \\\\ " << endl;
+        fichier << "Ramp ; n ; T ; id ; BestVal ; LowerBound ; Gap ; Nodes ; CPU \\\\ " << endl;
 
-        double time = 0 ; // total computational time (incremented by )
+        double time = 0 ; // total computational time (incremented by fuction process)
 
         //Instance parameters
-
         int T = 24;
         int n = 20 ;
         int sym = 3 ;
@@ -180,8 +160,7 @@ main(int argc,char**argv)
 
         string localisation = "data/smaller/" ; // folder containing data sets
         InstanceProcessed Instance = InstanceProcessed(n, T, bloc, demande, sym, cat01, intra, 0, localisation) ;
-
-        fichier << localisation << endl ;
+   
         Instance.localisation = localisation ;
 
         n=30;
